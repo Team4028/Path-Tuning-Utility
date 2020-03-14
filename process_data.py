@@ -4,8 +4,9 @@ import math as m
 from sklearn.linear_model import LinearRegression
 import pwlf
 from timeit import default_timer as tictoc
+from tqdm import tqdm as with_progress_bar
 
-running_case = 'with_accel'
+running_case = 'without_accel'
 measurement_points = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
 class data_point:
@@ -63,7 +64,7 @@ def unify_data():
     for po in measurement_points:
         cur = read(po)
         # There's a little latency, so start a few cycles in
-        for ind in range(4, len(cur)):
+        for ind in range(5, len(cur)):
             v = cur[ind].velo
             a = (cur[ind].velo - cur[ind - 1].velo) / (cur[ind].time - cur[ind - 1].time)
             in_data.append([v, a])
@@ -89,9 +90,7 @@ r_squared = 0
 
 if running_case == 'without_accel':
     num_trials = 100
-    for trial in range(num_trials):
-        if trial % 10 == 0 and trial > 0:
-            print(str(trial) + ' trials completed')
+    for trial in with_progress_bar(range(num_trials)):
         velo_feed_forward_add, static_feed_forward_add, r_squared_add = run()
         velo_feed_forward += velo_feed_forward_add
         static_feed_forward += static_feed_forward_add
@@ -135,6 +134,13 @@ print("Computation Time: " + str(end_time - start_time))
 ##   Static Feed Forward: 0.0016373042839475038              ##
 ##   R-Squared: 0.9998100000000001                           ##
 ##   Computation Time: 1135.0278686000001                    ##
+##                                                           ##
+##   100%|██████████| 100/100 [55:04<00:00, 27.21s/it]       ##
+##   Velocity Feed Forward: 0.006269403777839393             ##   
+##   Acceleration Feed Forward: 0                            ##
+##   Static Feed Forward: 0                                  ##
+##   R-Squared: 0.9995800000000001                           ##
+##   Computation Time: 3304.3854485                          ##
 ##                                                           ##
 ###############################################################
 ##                                                           ##
